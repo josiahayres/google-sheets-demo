@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import reportWebVitals from "./reportWebVitals";
-import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root, {
   loader as rootLoader,
   action as rootAction,
@@ -10,55 +10,58 @@ import Root, {
 import ErrorPage from "./ErrorPage";
 
 import "./index.css";
-import Contact, {
-  loader as contactLoader,
-  deleteAction,
-  updateAction,
-} from "./routes/Contact";
-import EditContact, { action as editAction } from "./routes/Edit";
-import Home from "./routes/Home";
+import Validate, {
+  loader as validateLoader,
+  action as validateAction,
+} from "./routes/Validate";
+import CurrentUser from "./routes/CurrentUser";
+import Question from "./routes/Question";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AlreadyComplete from "./routes/AlreadyComplete";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
     errorElement: <ErrorPage />,
-    loader: rootLoader,
-    action: rootAction,
     children: [
       {
         errorElement: <ErrorPage />,
-
         children: [
-          { index: true, element: <Home /> },
           {
-            path: "contacts/:contactId",
-            element: <Contact />,
-            loader: contactLoader,
-            action: updateAction,
-          },
-          {
-            path: "contacts/:contactId/edit",
-            element: <EditContact />,
-            loader: contactLoader,
-            action: editAction,
-          },
-          {
-            path: "contacts/:contactId/destroy",
-            loader: contactLoader,
-            action: deleteAction,
+            index: true,
+            element: <Validate />,
+            loader: validateLoader,
+            action: validateAction,
             errorElement: <div>Oops! There was an error.</div>,
+          },
+          {
+            path: "already-complete",
+            element: <AlreadyComplete />,
+          },
+          {
+            path: "user/:code",
+            element: <CurrentUser />,
+            children: [
+              {
+                path: ":questionId",
+                element: <Question />,
+              },
+            ],
           },
         ],
       },
     ],
   },
 ]);
+const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 
