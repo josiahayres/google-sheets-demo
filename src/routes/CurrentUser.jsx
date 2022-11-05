@@ -30,7 +30,7 @@ export default function CurrentUser() {
       if (typeof data?.validUser !== "boolean" || !data.validUser) {
         return;
       }
-      if (data?.hasCompletedToday) {
+      if (!!data.completed) {
         navigate("/already-complete");
       }
     },

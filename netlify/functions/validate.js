@@ -65,13 +65,14 @@ exports.handler = async function (event, context) {
       const rowAdded = await formDataSheet.addRow({
         code,
         date: today,
+        completed: false,
       });
 
       return {
         statusCode: 200,
         body: JSON.stringify({
           validUser: true,
-          hasCompletedToday: false,
+          completed: false,
           rowIndex: rowAdded.rowIndex,
         }),
       };
@@ -79,7 +80,10 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ validUser: true, hasCompletedToday: true }),
+      body: JSON.stringify({
+        validUser: true,
+        completed: formDataRows[todaysQuestionsIndex]["completed"] === "TRUE",
+      }),
     };
   } catch (error) {
     console.error(error);
