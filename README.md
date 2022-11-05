@@ -3,6 +3,7 @@
 Created with Create React App.
 
 ```
+# To setup
 npm install netlify-cli
 netlify login
 netlify --telemetry-disable

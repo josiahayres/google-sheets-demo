@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useEffect } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
+
+export async function validateCode(code) {
+  const response = await fetch(`/.netlify/functions/validate?code=${code}`);
+  const data = await response.json();
+  return data;
+}
 
 export const getAnswers = async (code) => {
   const response = await fetch(
@@ -14,30 +19,52 @@ export const getAnswers = async (code) => {
 };
 
 export default function CurrentUser() {
-  const params = useParams();
   const navigate = useNavigate();
-
+  const params = useParams();
   const code = params?.code;
-  const questionId = params.questionId;
+
+  const validate = useQuery({
+    refetchOnWindowFocus: false,
+    queryFn: () => validateCode(code),
+    onSuccess: (data) => {
+      if (typeof data?.validUser !== "boolean" || !data.validUser) {
+        return;
+      }
+      if (data?.hasCompletedToday) {
+        navigate("/already-complete");
+      }
+    },
+  });
+
+  const validParticipantCode = validate.isSuccess && validate.data.validUser;
 
   const query = useQuery({
     queryKey: ["answers"],
     queryFn: () => getAnswers(code),
+    enabled: validParticipantCode,
   });
 
-  // AUTO NAVIGATE TO FIRST QUESTION
-  useEffect(() => {
-    if (!questionId && query.isSuccess) navigate("./q1");
-  }, [query.isSuccess, questionId, navigate]);
+  const error = validate.isSuccess && validate.data.message;
+
+  const handleStartClick = () => {
+    navigate("./q1");
+  };
 
   return (
     <div id="CurrentUser">
-      <h1>Current user code {code}</h1>
-      <code>
-        {query.isFetching ? <p>Fetching</p> : <p>Todays answers:</p>}
-        <pre>{JSON.stringify(query.data, null, 2)}</pre>
-      </code>
-      <Outlet />
+      <h1>Current participant code {code}</h1>
+      {validate.isFetching && <p>Validating code</p>}
+      {error && <p>{error}</p>}
+      {validParticipantCode && (
+        <>
+          <code>
+            {query.isFetching ? <p>Fetching</p> : <p>Todays answers:</p>}
+            <pre>{JSON.stringify(query.data, null, 2)}</pre>
+          </code>
+          <button onClick={handleStartClick}>Start Questions</button>
+          <Outlet />
+        </>
+      )}
     </div>
   );
 }

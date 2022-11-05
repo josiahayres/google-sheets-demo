@@ -42,9 +42,10 @@ exports.handler = async function (event, context) {
     if (participantRowIndex === -1) {
       // User code does not exist
       return {
-        statusCode: 401,
+        statusCode: 200,
         body: JSON.stringify({
-          message: "This participant code is invalid",
+          validUser: false,
+          message: "Invalid participant code",
         }),
       };
     }
@@ -69,6 +70,7 @@ exports.handler = async function (event, context) {
       return {
         statusCode: 200,
         body: JSON.stringify({
+          validUser: true,
           hasCompletedToday: false,
           rowIndex: rowAdded.rowIndex,
         }),
@@ -77,9 +79,7 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        hasCompletedToday: true,
-      }),
+      body: JSON.stringify({ validUser: true, hasCompletedToday: true }),
     };
   } catch (error) {
     console.error(error);

@@ -1,23 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import reportWebVitals from "./reportWebVitals";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Root, {
-  loader as rootLoader,
-  action as rootAction,
-} from "./routes/Root";
+import AlreadyComplete from "./routes/AlreadyComplete";
+import CurrentUser from "./routes/CurrentUser";
 import ErrorPage from "./ErrorPage";
+import Root from "./routes/Root";
+import Question from "./routes/Question";
+import Validate from "./routes/Validate";
 
 import "./index.css";
-import Validate, {
-  loader as validateLoader,
-  action as validateAction,
-} from "./routes/Validate";
-import CurrentUser from "./routes/CurrentUser";
-import Question from "./routes/Question";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AlreadyComplete from "./routes/AlreadyComplete";
 
 const router = createBrowserRouter([
   {
@@ -26,28 +20,25 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        errorElement: <ErrorPage />,
+        index: true,
+        element: <Validate />,
+        errorElement: <div>Oops! There was an error.</div>,
+      },
+      {
+        path: "already-complete",
+        element: <AlreadyComplete />,
+      },
+      {
+        path: "user/:code",
+        element: <CurrentUser />,
         children: [
           {
-            index: true,
-            element: <Validate />,
-            loader: validateLoader,
-            action: validateAction,
-            errorElement: <div>Oops! There was an error.</div>,
+            path: "confirm",
+            element: <p>Confirm today's answers</p>,
           },
           {
-            path: "already-complete",
-            element: <AlreadyComplete />,
-          },
-          {
-            path: "user/:code",
-            element: <CurrentUser />,
-            children: [
-              {
-                path: ":questionId",
-                element: <Question />,
-              },
-            ],
+            path: ":questionId",
+            element: <Question />,
           },
         ],
       },

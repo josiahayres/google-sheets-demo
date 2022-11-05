@@ -1,39 +1,38 @@
 import React from "react";
-import { Form, redirect, useLoaderData } from "react-router-dom";
-
-export async function action({ request, params }) {
-  let formData = await request.formData();
-  const contact = await fetch(
-    `/.netlify/functions/validate?code=${formData.get("code")}`
-  );
-  const data = await contact.json();
-  // if (data?.hasCompletedToday) return redirect(`/already-complete`);
-  return redirect(`/user/${formData.get("code")}`);
-}
-
-export async function loader({ request }) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  return { code };
-}
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Validate() {
-  const { code } = useLoaderData();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+
+  const code = params.get("code");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Don't try submit
+    navigate(`/user/${code}`);
+  };
+
+  const handleCodeChange = (e) => {
+    const newCode = e.currentTarget.value;
+    setParams({ code: newCode });
+  };
 
   return (
-    <div>
-      <Form id="search-form" method="post">
+    <form onSubmit={handleSubmit} id="search-form">
+      <h1>Enter participant code</h1>
+      <fieldset>
         <input
           id="code"
           aria-label="Enter ID"
           placeholder="Search"
           type="search"
           name="code"
-          defaultValue={code}
+          value={code}
+          onChange={handleCodeChange}
+          required
         />
-        <div id="search-spinner" aria-hidden hidden={true} />
-        <div className="sr-only" aria-live="polite"></div>
-      </Form>
-    </div>
+        <button type="submit">Validate</button>
+      </fieldset>
+    </form>
   );
 }

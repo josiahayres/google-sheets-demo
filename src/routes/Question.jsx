@@ -51,10 +51,9 @@ export default function Question() {
   return (
     <div>
       <h2>Question {questionId}</h2>
-
       <form onSubmit={handleSubmit}>
         <fieldset
-          disabled={answersQuery.isFetching || mutation.isLoading}
+          disabled={mutation.isLoading}
           style={{ display: "flex", gap: "1em", border: "none" }}
         >
           <div>
@@ -67,12 +66,11 @@ export default function Question() {
           </div>
           <button type="submit">Submit</button>
         </fieldset>
+        {mutation.isLoading && <p>Saving</p>}
       </form>
 
-      <p>Todo: Add form to show single question</p>
-
       {questionId === "q1" && <Link to="../q2">Next question</Link>}
-      {questionId === "q2" && <Link to="../q1">Previous question</Link>}
+      {questionId === "q2" && <Link to="../confirm">Confirm</Link>}
     </div>
   );
 }
